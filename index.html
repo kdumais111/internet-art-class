@@ -1,0 +1,107 @@
+<script src="https://cdn.jsdelivr.net/gh/netizenorg/netnet-standard-library/build/nn.min.js"></script>
+<script>
+  /* global nn */
+  
+  let canvas, ctx, circles;
+  const circleRadius = 20;
+  const numCircles = 24
+  
+  function setup() {
+    nn.get('body').css({ margin: '0', height: '100vh' });
+    canvas = nn.create('canvas').addTo('body');
+    canvas.width = nn.width; // match the window's width
+    canvas.height = nn.height; // match the window's height
+    ctx = canvas.getContext('2d');
+    
+    // Define circle parameters
+    const circleRadius = 20;
+    const numCircles = 24;
+
+    // Initialize array to store circle coordinates and velocities
+    circles = [];
+
+    // Draw circles at random positions
+    for (let i = 0; i < numCircles; i++) {
+      const x = getRandomInt(circleRadius, canvas.width - circleRadius);
+      const y = getRandomInt(circleRadius, canvas.height - circleRadius);
+      const dx = getRandomInt(-2, 2);
+      const dy = getRandomInt(-2, 2);
+      circles.push({ x, y, dx, dy });
+      drawCircle(x, y, circleRadius);
+    }
+
+    // Connect circles with lines
+    connectCircles();
+
+    // Start animation loop
+    animate();
+  }
+
+  function animate() {
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Move circles and redraw
+    circles.forEach(circle => {
+      circle.x += circle.dx;
+      circle.y += circle.dy;
+
+      // Check boundaries
+      if (circle.x - circleRadius < 0 || circle.x + circleRadius > canvas.width) {
+        circle.dx *= -1;
+      }
+      if (circle.y - circleRadius < 0 || circle.y + circleRadius > canvas.height) {
+        circle.dy *= -1;
+      }
+
+      // Redraw circle
+      drawCircle(circle.x, circle.y, circleRadius);
+    });
+
+    // Redraw lines
+    connectCircles();
+
+    // Request animation frame
+    requestAnimationFrame(animate);
+  }
+
+  function drawCircle(x, y, radius) {
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, Math.PI * 2);
+    ctx.fillStyle = 'blue';
+    ctx.fill();
+    ctx.closePath();
+  }
+
+  function connectCircles() {
+    // Clear previous connections
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Redraw lines
+    for (let i = 0; i < circles.length; i++) {
+      for (let j = i + 1; j < circles.length; j++) {
+        if (i > 24){
+          break}
+        const startCircle = circles[i];
+        const endCircle = circles[j];
+        if (j % 2 === 1){
+        drawLine(startCircle.x, startCircle.y, endCircle.x, endCircle.y);}
+      }
+    }
+  }
+
+  function drawLine(x1, y1, x2, y2) {
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.strokeStyle = 'black';
+    ctx.stroke();
+    ctx.closePath();
+  }
+  
+  function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+  
+  nn.on('load', setup);
+</script>
